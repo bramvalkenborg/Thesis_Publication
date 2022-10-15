@@ -1,14 +1,6 @@
 # Import packages
 from thesis_pub_tools import *
-from scipy import optimize
-from scipy import stats
-import sklearn.preprocessing
-import sklearn.linear_model as lm
-import statsmodels.api as sm
 import datetime
-from patsy import dmatrices
-import matplotlib.colors as clr
-from matplotlib.pyplot import cm
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Settings
@@ -113,25 +105,7 @@ else:
 
 SIF_sAnom, WTD_sAnom = short_anom(lat, lon, time, SIFnorm, WTD)
 SIF_lAnom, WTD_lAnom = long_anom(lat, lon, time, SIFnorm, WTD)
-# SIF_seas = seasonality(lat, lon, time, SIFnorm)
-# WTD_seas = seasonality(lat, lon, time, WTD)
-# SIF_clim = lt_climatology(lat, lon, time, SIFnorm)
-# WTD_clim = lt_climatology(lat, lon, time, WTD)
 
-
-def func(WTDanom, WTD, a, b):
-    return a * WTDanom + b * WTDanom * WTD
-
-
-"""
-WTD_opt = np.zeros((len(lat), len(lon)))
-for ilat in range(len(lat)):
-    for ilon in range(len(lon)):
-        SIF_sAnom_pix = SIF_sAnom[ilat, ilon, :]
-        WTD_sAnom_pix = WTD_sAnom[ilat, ilon, :]
-        WTD_pix = WTD[ilat, ilon, :]
-        WTD_opt[ilat, ilon] = cal_WaterStressModel(SIF_sAnom_pix, WTD_sAnom_pix, WTD_pix, p, time)[1]
-"""
 
 # Bootstrap analysis
 WTDopt_s = np.zeros((len(lat), len(lon)))
