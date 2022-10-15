@@ -7,11 +7,11 @@ import datetime
 # ----------------------------------------------------------------------------------------------------------------------
 # Main settings
 peat_min = 0.50
-area = 'NH'
+area = 'test'
 SIF_PAR = True
 Time_2021 = True
 SP_res = 0.2
-p = 0.05
+p = 1
 output_file = '/data/leuven/336/vsc33653/OUTPUT_pub/uncertainty_WTDopt.txt'
 # ----------------------------
 corr = '_c30_pt' + str(round(peat_min * 100)) + '_SPres' + str(round(SP_res*10)) + '_pValue' + str(int(round(p*100)))
@@ -52,10 +52,16 @@ elif area == 'Obi_River':
     title = 'Obi River'
     res = 'l'
 elif area == 'NH':
-    # lat_lim = [51, 53]
-    # lon_lim = [-86, -84]
     lat_lim = [63, 64]
     lon_lim = [-117, -115]
+    int_lon = 20
+    int_lat = 5
+    figsize = (10, 1.65)
+    title = ''
+    res = 'c'
+elif area == 'test':
+    lat_lim = [51, 53]
+    lon_lim = [-86, -84]
     int_lon = 20
     int_lat = 5
     figsize = (10, 1.65)
@@ -133,7 +139,7 @@ WTDopt_l = np.zeros((len(lat), len(lon)))
 WTD_CI_5_l = np.zeros((len(lat), len(lon)))
 WTD_CI_95_l = np.zeros((len(lat), len(lon)))
 for ilat in range(len(lat)):
-    print(str(ilat))
+    print('Calibration: ' + str(round((ilat / len(lat)) * 100, 2)) + '%')
     for ilon in range(len(lon)):
         if not np.isnan(WTD).all() and not np.isnan(SIF_lAnom).all() and not np.isnan(WTD_lAnom).all():
             WTDopt_mean_pix_l, WTD_CI_5_pix_l, WTD_CI_95_pix_l = Bootstrap_uncertainty(SIF_lAnom[ilat, ilon, :], WTD_lAnom[ilat, ilon, :], WTD[ilat, ilon, :], 10, p, time)
@@ -150,16 +156,23 @@ WTD_CI_95_mean_l = np.nanmean(WTD_CI_95_l)
 WTDopt_mean_l = np.nanmean(WTDopt_l)
 
 with open(output_file, 'a') as f:
-    f.write('-------------------------------------------------------------\n')
-    f.write('Uncertainty WTDopt                  Date:'+str(datetime.datetime.today()))
-    f.write('-------------------------------------------------------------\n')
+    f.write('--------------------------------------------------------------------------------------\n')
+    f.write('Uncertainty WTDopt                  Date:'+str(datetime.datetime.today())+'\n')
+    f.write('--------------------------------------------------------------------------------------\n')
+    f.wirte('Settings:\n')
+    f.write('   peat mask: ' + str(peat_min) + '\n')
+    f.write('   area: '+str(area)+'\n')
+    f.write('   p: '+str(p)+'\n')
+    f.write('   Normalized by PAR?: '+str(SIF_PAR)+'\n')
+    f.write('   2021 included?: '+str(Time_2021)+'\n')
+    f.write('   Spatial resolution: '+str(SP_res)+'\n')
     f.write('Short term analysis:\n')
-    f.write('Upper limit: '+str(WTD_CI_95_mean_s)+'\n')
-    f.write('WTDopt: ' + str(WTD_CI_95_mean_s) + '\n')
-    f.write('Lower limit: ' + str(WTD_CI_5_mean_s) + '\n\n')
+    f.write('   Upper limit: '+str(WTD_CI_95_mean_s)+'\n')
+    f.write('   WTDopt: ' + str(WTD_CI_95_mean_s) + '\n')
+    f.write('   Lower limit: ' + str(WTD_CI_5_mean_s) + '\n\n')
     f.write('Long term analysis:\n')
-    f.write('Upper limit: ' + str(WTD_CI_95_mean_l) + '\n')
-    f.write('WTDopt: ' + str(WTD_CI_95_mean_l) + '\n')
-    f.write('Lower limit: ' + str(WTD_CI_5_mean_l) + '\n')
+    f.write('   Upper limit: ' + str(WTD_CI_95_mean_l) + '\n')
+    f.write('   WTDopt: ' + str(WTD_CI_95_mean_l) + '\n')
+    f.write('   Lower limit: ' + str(WTD_CI_5_mean_l) + '\n')
     f.write('-------------------------------------------------------------\n')
-    f.write('-------------------------------------------------------------\n\n')
+    f.write('------------------------------------------------------------------------------------\n\n')

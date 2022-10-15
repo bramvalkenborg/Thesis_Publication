@@ -59,7 +59,7 @@ y = GPPn_shortAnom8d
 if not np.isnan(x1).all() and not np.isnan(x2).all() and not np.isnan(y).all():
     df = pd.DataFrame(np.transpose(np.asarray([x1, x2, y])), index=x2.index, columns=['WTD_sAnom', 'WTD', 'SIF_sAnom'])
     df.dropna(inplace=True)
-    n_corr_s, rho_s = correct_n(df)
+    n_corr_s = correct_n(df)
     # n_s[lat1, lon1] = len(np.where(np.logical_not(np.isnan(SIF_sAnom[lat1, lon1, :])))[0])
     x1a = x1[np.logical_not(np.isnan(x1))]
     x2a = x2[np.logical_not(np.isnan(x1))]
@@ -144,7 +144,7 @@ y = GPPn_longAnom8d
 if not np.isnan(x1).all() and not np.isnan(x2).all() and not np.isnan(y).all():
     df = pd.DataFrame(np.transpose(np.asarray([x1, x2, y])), index=x2.index, columns=['WTD_lAnom', 'WTD', 'SIF_lAnom'])
     df.dropna(inplace=True)
-    n_corr_l, rho_l = correct_n(df)
+    n_corr_l = correct_n(df)
     # n_s[lat1, lon1] = len(np.where(np.logical_not(np.isnan(SIF_sAnom[lat1, lon1, :])))[0])
     x1a = x1[np.logical_not(np.isnan(x1))]
     x2a = x2[np.logical_not(np.isnan(x1))]

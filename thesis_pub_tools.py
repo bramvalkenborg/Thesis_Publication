@@ -587,7 +587,7 @@ def cal_WaterStressModel(SIF_anom, WTD_anom, WTD, p, time):
         df = pd.DataFrame(np.transpose(np.asarray([x1, x2, y])), index=time,
                           columns=['WTD_sAnom', 'WTD', 'SIF_sAnom'])
         df.dropna(inplace=True)
-        n_corr, rho = correct_n(df)
+        n_corr = correct_n(df)
         # n_s = len(np.where(np.logical_not(np.isnan(y)))[0])
         x1a = x1[np.logical_not(np.isnan(x1))]
         x2a = x2[np.logical_not(np.isnan(x1))]

@@ -8,7 +8,7 @@ import statsmodels_adapted.api as sm
 import statsmodels.formula.api as smf
 import datetime
 from patsy import dmatrices
-from GitClone.validation_good_practice.ancillary.metrics import correct_n
+from validation_good_practice.ancillary.metrics import correct_n
 # import GitClone.statsmodels.statsmodels.regression.linear_model as sm
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -16,7 +16,7 @@ from GitClone.validation_good_practice.ancillary.metrics import correct_n
 # ----------------------------------------------------------------------------------------------------------------------
 # Main settings
 peat_min = 0.50
-area = 'NH'
+area = 'test'
 SIF_PAR = False
 SIF_NIR = True
 if SIF_NIR and SIF_PAR:
@@ -66,6 +66,14 @@ elif area == 'Obi_River':
 elif area == 'NH':
     lat_lim = []
     lon_lim = []
+    int_lon = 20
+    int_lat = 5
+    figsize = (10, 1.65)
+    title = ''
+    res = 'c'
+elif area == 'test':
+    lat_lim = [51, 53]
+    lon_lim = [-86, -84]
     int_lon = 20
     int_lat = 5
     figsize = (10, 1.65)
