@@ -5,6 +5,7 @@ import statsmodels_adapted.api as sm
 
 input_file = 'CA_MER_GPP_analysis.csv'
 input_dir = '/data/leuven/336/vsc33653/Data/GPP_FluxTower/'
+output_file = '/data/leuven/336/vsc33653/OUTPUT_pub/GPP_output.txt'
 p = 1
 
 # Load the data
@@ -23,9 +24,6 @@ PAR = PAR.drop(PAR.index[PAR.index.month.isin([1, 2, 3, 4, 5, 10, 11, 12])])
 WTD = WTD.drop(WTD.index[WTD.index.month.isin([1, 2, 3, 4, 5, 10, 11, 12])])
 
 # Average to different resolution, coarser resolution reduces the error
-GPP = GPP.resample('1D').mean()
-WTD = WTD.resample('1D').mean()
-PAR = PAR.resample('1D').mean()
 GPP_8D = GPP.resample('8D').mean()
 WTD_8D = WTD.resample('8D').mean()
 PAR_8D = PAR.resample('8D').mean()
@@ -109,6 +107,19 @@ print('fp_values_s: '+str(fp_values_s))
 print('R2: '+str(Rsq_s))
 print('-------------------------------------------------------------')
 
+with open(output_file, 'a') as f:
+    f.write('-------------------------------------------------------------\n')
+    f.write('Short term results                           Date:'+str(datetime.datetime.today()))
+    f.write('-------------------------------------------------------------\n')
+    f.write('Alpha: '+str(coef_s[0])+'\n')
+    f.write('Beta: '+str(coef_s[1])+'\n')
+    f.write('WTDopt: '+str(WTD_opt_s)+'\n')
+    f.write('fp_values: '+str(fp_values_s)+'\n')
+    f.write('R2: '+str(Rsq_s)+'\n')
+    f.write('-------------------------------------------------------------\n')
+    f.write('Input file: '+input_dir+input_file+'\n')
+    f.write('-------------------------------------------------------------\n')
+    f.write('-------------------------------------------------------------\n\n')
 
 GPPn_longAnom = calc_anom(GPPn_1D, longterm=True) - calc_anom(GPPn_1D, longterm=False)
 WTD_longAnom = calc_anom(WTD_1D, longterm=True) - calc_anom(WTD_1D, longterm=False)
@@ -178,6 +189,20 @@ print('WTDopt: '+str(WTD_opt_l))
 print('fp_values_s: '+str(fp_values_l))
 print('R2: '+str(Rsq_l))
 print('-------------------------------------------------------------')
+
+with open(output_file, 'a') as f:
+    f.write('-------------------------------------------------------------\n')
+    f.write('Short term results                           Date:'+str(datetime.datetime.today()))
+    f.write('-------------------------------------------------------------\n')
+    f.write('Alpha: '+str(coef_s[0])+'\n')
+    f.write('Beta: '+str(coef_s[1])+'\n')
+    f.write('WTDopt: '+str(WTD_opt_s)+'\n')
+    f.write('fp_values: '+str(fp_values_s)+'\n')
+    f.write('R2: '+str(Rsq_s)+'\n')
+    f.write('-------------------------------------------------------------\n')
+    f.write('Input file: '+input_dir+input_file+'\n\n')
+    f.write('-------------------------------------------------------------\n')
+    f.write('-------------------------------------------------------------\n\n')
 
 '''
 # ----------------------------------------------------------------------------------------------------------------------
