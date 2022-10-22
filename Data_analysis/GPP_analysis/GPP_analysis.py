@@ -222,6 +222,51 @@ GPPn_clim_8D = clim(GPPn_8D, time=GPPn_8D.index)
 GPP_seas_8D = seas(GPP_8D, time=GPPn_8D.index)
 GPP_clim_8D = clim(GPP_8D, time=GPPn_8D.index)
 
+# Timeseries
+fig, (ax1, ax2, ax3, ax4) = plt.subplots(nrows=4, ncols=1)
+GPP_8D.plot(ax=ax1, color='red')
+GPP_seas_8D.plot(ax=ax1, color='grey')
+GPP_clim_8D.plot(ax=ax1, color='grey', linestyle='--')
+PAR_8D.plot(ax=ax2, color='green')
+GPPn_8D.plot(ax=ax3, color='orange')
+GPPn_seas_8D.plot(ax=ax3, color='grey')
+GPPn_clim_8D.plot(ax=ax3, color='grey', linestyle='--')
+WTD_8D.plot(ax=ax4, color='blue')
+WTD_seas_8D.plot(ax=ax4, color='grey')
+WTD_clim_8D.plot(ax=ax4, color='grey', linestyle='--')
+ax1.set_ylabel('GPP')
+ax2.set_ylabel('PAR')
+ax3.set_ylabel('GPP/PAR')
+ax4.set_ylabel('WTD')
 
 
+plt.figure()
+plt.scatter(GPP_8D, PAR_8D)
+plt.xlabel('GPP')
+plt.ylabel('PAR')
 
+plt.figure()
+plt.scatter(PAR, GPP, s=0.5, c=GPP.index.month, cmap='brg')
+plt.xlabel('PAR')
+plt.ylabel('GPP')
+plt.colorbar()
+
+fig, (ax1, ax2, ax3, ax4) = plt.subplots(nrows=4, ncols=1, sharex=True)
+GPPn_shortAnom8d.plot.bar(ax=ax1, xticks=[], color='red')
+WTD_shortAnom8d.plot.bar(ax=ax2, xticks=[], color='blue')
+GPPn_longAnom8d.plot.bar(ax=ax3, xticks=[], color='red')
+WTD_longAnom8d.plot.bar(ax=ax4, xticks=[], color='blue')
+
+fig, (ax1, ax2) = plt.subplots(1, 2)
+norm_st = mpl.colors.TwoSlopeNorm(vmin=np.nanmin(WTD_8D), vcenter=WTD_opt_s,
+                                  vmax=np.nanmax(WTD_8D))
+WTD_shortAnom8d_w = WTD_shortAnom8d[WTD_8D <= WTD_opt_s]
+WTD_shortAnom8d_d = WTD_shortAnom8d[WTD_8D > WTD_opt_s]
+GPPn_shortAnom8d_w = GPPn_shortAnom8d[WTD_8D <= WTD_opt_s]
+GPPn_shortAnom8d_d = GPPn_shortAnom8d[WTD_8D > WTD_opt_s]
+WTD_8D_w = WTD_8D[WTD_8D <= WTD_opt_s]
+WTD_8D_d = WTD_8D[WTD_8D > WTD_opt_s]
+ax1.scatter(WTD_shortAnom8d_w, GPPn_shortAnom8d_w, c=WTD_8D_w, cmap='seismic', norm=norm_st)
+ax2.scatter(WTD_shortAnom8d_d, GPPn_shortAnom8d_d, c=WTD_8D_d, cmap='seismic', norm=norm_st)
+ax1.grid()
+ax2.grid()
