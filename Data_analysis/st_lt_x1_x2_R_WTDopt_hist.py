@@ -16,7 +16,7 @@ from validation_good_practice.ancillary.metrics import correct_n
 # ----------------------------------------------------------------------------------------------------------------------
 # Main settings
 peat_min = 0.50
-area = 'test'
+area = 'NH'
 SIF_PAR = False
 SIF_NIR = True
 if SIF_NIR and SIF_PAR:
