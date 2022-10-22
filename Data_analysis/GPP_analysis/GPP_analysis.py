@@ -3,6 +3,8 @@ from validation_good_practice.ancillary.metrics import correct_n
 from patsy import dmatrices
 import statsmodels_adapted.api as sm
 
+write = True
+description = 'Resolution 8D'
 input_file = 'CA_MER_GPP_analysis.csv'
 input_dir = '/data/leuven/336/vsc33653/Data/GPP_FluxTower/'
 output_file = '/data/leuven/336/vsc33653/OUTPUT_pub/GPP_output.txt'
@@ -47,12 +49,6 @@ GPPn_shortAnom8d = GPPn_shortAnom.resample('8D').first()
 # Model short term anomalies
 coef_s = np.zeros(2)
 p_values_s = np.zeros(2)
-# fp_values_s = np.zeros((len(lat), len(lon)))
-# WTD_opt_s = np.zeros((len(lat), len(lon)))
-# n_corr_s = np.zeros((len(lat), len(lon)))
-# rho_s = np.zeros((len(lat), len(lon)))
-# n_s = np.zeros((len(lat), len(lon)))
-# Rsq_s = np.zeros((len(lat), len(lon)))
 x1 = WTD_shortAnom8d
 x2 = WTD_8D
 y = GPPn_shortAnom8d
@@ -107,34 +103,28 @@ print('fp_values_s: '+str(fp_values_s))
 print('R2: '+str(Rsq_s))
 print('-------------------------------------------------------------')
 
-with open(output_file, 'a') as f:
-    f.write('-------------------------------------------------------------\n')
-    f.write('Short term results                           Date:'+str(datetime.datetime.today())+'\n')
-    f.write('-------------------------------------------------------------\n')
-    f.write('Alpha: '+str(coef_s[0])+'\n')
-    f.write('Beta: '+str(coef_s[1])+'\n')
-    f.write('WTDopt: '+str(WTD_opt_s)+'\n')
-    f.write('fp_values: '+str(fp_values_s)+'\n')
-    f.write('R2: '+str(Rsq_s)+'\n')
-    f.write('-------------------------------------------------------------\n')
-    f.write('Input file: '+input_dir+input_file+'\n')
-    f.write('-------------------------------------------------------------\n')
-    f.write('-------------------------------------------------------------\n\n')
+if write:
+    with open(output_file, 'a') as f:
+        f.write('-------------------------------------------------------------\n')
+        f.write('Short term results                           Date:'+str(datetime.datetime.today())+'\n')
+        f.write('-------------------------------------------------------------\n')
+        f.write(description+'\n')
+        f.write('-------------------------------------------------------------\n')
+        f.write('Alpha: '+str(coef_s[0])+'\n')
+        f.write('Beta: '+str(coef_s[1])+'\n')
+        f.write('WTDopt: '+str(WTD_opt_s)+'\n')
+        f.write('fp_values: '+str(fp_values_s)+'\n')
+        f.write('R2: '+str(Rsq_s)+'\n')
+        f.write('-------------------------------------------------------------\n')
+        f.write('Input file: '+input_dir+input_file+'\n')
+        f.write('-------------------------------------------------------------\n')
+        f.write('-------------------------------------------------------------\n\n')
 
 GPPn_longAnom = calc_anom(GPPn_1D, longterm=True) - calc_anom(GPPn_1D, longterm=False)
 WTD_longAnom = calc_anom(WTD_1D, longterm=True) - calc_anom(WTD_1D, longterm=False)
 WTD_longAnom8d = WTD_longAnom.resample('8D').first()
 GPPn_longAnom8d = GPPn_longAnom.resample('8D').first()
 
-# Model long term anomalies
-coef_l = np.zeros(2)
-p_values_l = np.zeros(2)
-x1 = WTD_longAnom8d
-x2 = WTD_8D
-y = GPPn_longAnom8d
-x1 = WTD_longAnom8d
-x2 = WTD_8D
-y = GPPn_longAnom8d
 # Model long term anomalies
 coef_l = np.zeros(2)
 p_values_l = np.zeros(2)
@@ -190,19 +180,22 @@ print('fp_values_s: '+str(fp_values_l))
 print('R2: '+str(Rsq_l))
 print('-------------------------------------------------------------')
 
-with open(output_file, 'a') as f:
-    f.write('-------------------------------------------------------------\n')
-    f.write('Long term results                           Date:'+str(datetime.datetime.today())+'\n')
-    f.write('-------------------------------------------------------------\n')
-    f.write('Alpha: '+str(coef_l[0])+'\n')
-    f.write('Beta: '+str(coef_l[1])+'\n')
-    f.write('WTDopt: '+str(WTD_opt_l)+'\n')
-    f.write('fp_values: '+str(fp_values_l)+'\n')
-    f.write('R2: '+str(Rsq_l)+'\n')
-    f.write('-------------------------------------------------------------\n')
-    f.write('Input file: '+input_dir+input_file+'\n')
-    f.write('-------------------------------------------------------------\n')
-    f.write('-------------------------------------------------------------\n\n')
+if write:
+    with open(output_file, 'a') as f:
+        f.write('-------------------------------------------------------------\n')
+        f.write('Long term results                           Date:'+str(datetime.datetime.today())+'\n')
+        f.write('-------------------------------------------------------------\n')
+        f.write(description+'\n')
+        f.write('-------------------------------------------------------------\n')
+        f.write('Alpha: '+str(coef_l[0])+'\n')
+        f.write('Beta: '+str(coef_l[1])+'\n')
+        f.write('WTDopt: '+str(WTD_opt_l)+'\n')
+        f.write('fp_values: '+str(fp_values_l)+'\n')
+        f.write('R2: '+str(Rsq_l)+'\n')
+        f.write('-------------------------------------------------------------\n')
+        f.write('Input file: '+input_dir+input_file+'\n')
+        f.write('-------------------------------------------------------------\n')
+        f.write('-------------------------------------------------------------\n\n')
 
 '''
 # ----------------------------------------------------------------------------------------------------------------------
