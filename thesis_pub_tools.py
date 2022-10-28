@@ -344,6 +344,7 @@ def rm_nan(x):
     x = x2
     return x
 
+
 def rm_nan_2D(x, y):
     x1 = x[np.logical_not(np.isnan(x))]
     y1 = y[np.logical_not(np.isnan(x))]
@@ -631,16 +632,40 @@ def cal_WaterStressModel(SIF_anom, WTD_anom, WTD, p, time):
 # ----------------------------------------------------------------------------------------------------------------------
 # Bootstrap uncertainty analysis
 # ----------------------------------------------------------------------------------------------------------------------
-def Bootstrap_uncertainty(SIF_Anom, WTD_Anom, WTD, nRuns, p, time):
-    WTDopt_bootstrap = np.zeros((nRuns))
+def Bootstrap_uncertainty(SIF_Anom, WTD_Anom, WTD, nRuns, time):
+    random_data = np.zeros((176, 3, nRuns))
+    time_rand = np.random.choice(SIF_Anom.shape[0], (SIF_Anom.size, nRuns), replace=True)
+    random_data[:, 0, :] = SIF_Anom[time_rand]
+    random_data[:, 1, :] = WTD_Anom[time_rand]
+    random_data[:, 2, :] = WTD[time_rand]
+
+    # Apply the WaterStressModel
+    WTD_opt = np.zeros(nRuns)
     for i in range(nRuns):
-        time_rand = np.random.choice(SIF_Anom.shape[0], SIF_Anom.size, replace=True)
-        SIFanom_rand = SIF_Anom[time_rand]
-        WTDanom_rand = WTD_Anom[time_rand]
-        WTD_rand = WTD[time_rand]
-        WTD_opt = cal_WaterStressModel(SIFanom_rand, WTDanom_rand, WTD_rand, p, time)[1]
-        WTDopt_bootstrap[i] = WTD_opt
-    WTDopt_mean = np.nanmean(WTDopt_bootstrap)
+        x1 = random_data[:, 1, i]  # WTD_anom
+        x2 = random_data[:, 2, i]  # WTD
+        y = random_data[:, 0, i]  # SIF_anom
+        if not np.isnan(x1).all() and not np.isnan(x2).all() and not np.isnan(y).all():
+            df = pd.DataFrame(np.transpose(np.asarray([x1, x2, y])), index=time,
+                              columns=['WTD_sAnom', 'WTD', 'SIF_sAnom'])
+            df.dropna(inplace=True)
+            n_corr = correct_n(df)
+            x1a = x1[np.logical_not(np.isnan(x1))]
+            x2a = x2[np.logical_not(np.isnan(x1))]
+            ya = y[np.logical_not(np.isnan(x1))]
+            x1b = x1a[np.logical_not(np.isnan(x2a))]
+            x2b = x2a[np.logical_not(np.isnan(x2a))]
+            yb = ya[np.logical_not(np.isnan(x2a))]
+            x1 = x1b[np.logical_not(np.isnan(yb))]
+            x2 = x2b[np.logical_not(np.isnan(yb))]
+            y = yb[np.logical_not(np.isnan(yb))]
+            Y, X = dmatrices('y ~ x1 + x1 : x2')
+            model = sm.OLS(y, X[:, 1:3]).fit(nobs_corr=n_corr)
+            coef = model.params
+            WTD_opt[i] = -coef[0] / coef[1]
+        else:
+            WTD_opt[i] = np.nan
+    WTDopt_mean = np.nanmean(WTD_opt)
     WTD_CI_5 = np.nanquantile(WTD_opt, 0.05)
     WTD_CI_95 = np.nanquantile(WTD_opt, 0.95)
     return WTDopt_mean, WTD_CI_5, WTD_CI_95
