@@ -31,7 +31,7 @@ WTD_8D = WTD.resample('8D').mean()
 PAR_8D = PAR.resample('8D').mean()
 
 # Normalization
-GPPn_8D = GPP_8D/PAR_8D
+GPPn_8D = GPP_8D
 
 # Refill the timeseries to a daily resolution, this is needed for the anomaly calculations
 GPPn_1D = GPPn_8D.resample('1D').bfill()
@@ -49,51 +49,8 @@ GPPn_shortAnom8d = GPPn_shortAnom.resample('8D').first()
 PAR_shortAnom8d = PAR_shortAnom.resample('8D').first()
 
 # Model short term anomalies
-coef_s = np.zeros(2)
-p_values_s = np.zeros(2)
-x1 = WTD_shortAnom8d
-x2 = WTD_8D
-y = GPPn_shortAnom8d
-if not np.isnan(x1).all() and not np.isnan(x2).all() and not np.isnan(y).all():
-    df = pd.DataFrame(np.transpose(np.asarray([x1, x2, y])), index=x2.index, columns=['WTD_sAnom', 'WTD', 'SIF_sAnom'])
-    df.dropna(inplace=True)
-    n_corr_s = correct_n(df)
-    # n_s[lat1, lon1] = len(np.where(np.logical_not(np.isnan(SIF_sAnom[lat1, lon1, :])))[0])
-    x1a = x1[np.logical_not(np.isnan(x1))]
-    x2a = x2[np.logical_not(np.isnan(x1))]
-    ya = y[np.logical_not(np.isnan(x1))]
-    x1b = x1a[np.logical_not(np.isnan(x2a))]
-    x2b = x2a[np.logical_not(np.isnan(x2a))]
-    yb = ya[np.logical_not(np.isnan(x2a))]
-    x1 = x1b[np.logical_not(np.isnan(yb))]
-    x2 = x2b[np.logical_not(np.isnan(yb))]
-    y = yb[np.logical_not(np.isnan(yb))]
-    Y, X = dmatrices('y ~ x1 + x1 : x2')
-    model = sm.OLS(y, X[:, 1:3]).fit(nobs_corr=n_corr_s)
-    # model = sm.OLS(y, X[:, 1:3]).fit()
-    # Y_r, X_r = dmatrices('y ~ x1')
-    # model_r = sm.OLS(y, X_r[:, 1:3]).fit()
-    # fp_values_s[lat1, lon1] = CalcP_f_statistic(model, model_r, n_corr[lat1, lon1], 2)
-    fp_values_s = model.f_pvalue
-    p_values_s[:] = model.pvalues
-    if fp_values_s <= p:
-        coef_s[:] = model.params
-        WTD_opt_s = -coef_s[0]/coef_s[1]
-        Rsq_s = model.rsquared
-    else:
-        coef_s[:] = model.params
-        WTD_opt_s = -coef_s[0]/coef_s[1]
-        Rsq_s = model.rsquared
-        # p_values_s[lat1, lon1, :] = np.nan
-        # n_corr[lat1, lon1] = np.nan
-else:
-    coef_s[:] = np.nan
-    fp_values_s = np.nan
-    WTD_opt_s = np.nan
-    n_corr_s = np.nan
-    n_s = np.nan
-    rho_s = np.nan
-    Rsq_s = np.nan
+coef_s, WTD_opt_s, n_corr_s, fp_values_s, p_values_s, Rsq_s = cal_WaterStressModel(GPPn_shortAnom8d, WTD_shortAnom8d, WTD_8D, WTD_8D.index)
+
 
 print('-------------------------------------------------------------')
 print('Short term results')
@@ -130,49 +87,8 @@ PAR_longAnom8d = PAR_longAnom.resample('8D').first()
 GPPn_longAnom8d = GPPn_longAnom.resample('8D').first()
 
 # Model long term anomalies
-coef_l = np.zeros(2)
-p_values_l = np.zeros(2)
-x1 = WTD_longAnom8d
-x2 = WTD_8D
-y = GPPn_longAnom8d
-if not np.isnan(x1).all() and not np.isnan(x2).all() and not np.isnan(y).all():
-    df = pd.DataFrame(np.transpose(np.asarray([x1, x2, y])), index=x2.index, columns=['WTD_lAnom', 'WTD', 'SIF_lAnom'])
-    df.dropna(inplace=True)
-    n_corr_l = correct_n(df)
-    # n_s[lat1, lon1] = len(np.where(np.logical_not(np.isnan(SIF_sAnom[lat1, lon1, :])))[0])
-    x1a = x1[np.logical_not(np.isnan(x1))]
-    x2a = x2[np.logical_not(np.isnan(x1))]
-    ya = y[np.logical_not(np.isnan(x1))]
-    x1b = x1a[np.logical_not(np.isnan(x2a))]
-    x2b = x2a[np.logical_not(np.isnan(x2a))]
-    yb = ya[np.logical_not(np.isnan(x2a))]
-    x1 = x1b[np.logical_not(np.isnan(yb))]
-    x2 = x2b[np.logical_not(np.isnan(yb))]
-    y = yb[np.logical_not(np.isnan(yb))]
-    Y, X = dmatrices('y ~ x1 + x1 : x2')
-    model = sm.OLS(y, X[:, 1:3]).fit(nobs_corr=n_corr_l)
-    # model = sm.OLS(y, X[:, 1:3]).fit()
-    # Y_r, X_r = dmatrices('y ~ x1')
-    # model_r = sm.OLS(y, X_r[:, 1:3]).fit()
-    # fp_values_s[lat1, lon1] = CalcP_f_statistic(model, model_r, n_corr[lat1, lon1], 2)
-    fp_values_l = model.f_pvalue
-    p_values_l[:] = model.pvalues
-    if fp_values_l <= p:
-        coef_l[:] = model.params
-        WTD_opt_l = -coef_l[0]/coef_l[1]
-        Rsq_l = model.rsquared
-    else:
-        coef_l[:] = model.params
-        WTD_opt_l = -coef_l[0]/coef_l[1]
-        Rsq_l = model.rsquared
-else:
-    coef_l[:] = np.nan
-    fp_values_l = np.nan
-    WTD_opt_l = np.nan
-    n_corr_l = np.nan
-    n_l = np.nan
-    rho_l = np.nan
-    Rsq_l = np.nan
+coef_l, WTD_opt_l, n_corr_l, fp_values_l, p_values_l, Rsq_l = cal_WaterStressModel(GPPn_longAnom8d, WTD_longAnom8d, WTD_8D, WTD_8D.index)
+
 
 print('-------------------------------------------------------------')
 print('Long term results')
