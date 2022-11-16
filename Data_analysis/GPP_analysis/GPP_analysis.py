@@ -3,22 +3,26 @@ from validation_good_practice.ancillary.metrics import correct_n
 from patsy import dmatrices
 import statsmodels_adapted.api as sm
 
+time_string = 'x_tv'
+WTD_string = 'wt'
+PAR_string = 'solar_f'
 write = False
-description = 'Resolution 8D, GPP'
-input_file = 'CA_MER_GPP_analysis.csv'
+description = 'Resolution 8D, GPP, mean anomalies'
+# input_file = 'CA_MER_GPP_analysis.csv'
+input_file = 'mb_met_flux_data_1998_2018.txt'
 input_dir = '/data/leuven/336/vsc33653/Data/GPP_FluxTower/'
 output_file = '/data/leuven/336/vsc33653/OUTPUT_pub/GPP_output.txt'
 p = 1
 
 # Load the data
 Df = pd.read_csv(input_dir+input_file)
-Df['Time'] = pd.to_datetime(Df['TIMESTAMP_END'])
-del Df['TIMESTAMP_END']
+Df['Time'] = pd.to_datetime(Df[time_string])
+del Df[time_string]
 Df = Df.set_index(['Time'])
-WTD = pd.Series(Df['WTD'])
+WTD = pd.Series(Df[WTD_string])
 WTD = WTD/100
-GPP = pd.Series(Df['GPP'])
-PAR = pd.Series(Df['PAR'])
+GPP = pd.Series(Df['nep_f']+Df['re_f'])
+PAR = pd.Series(Df[PAR_string])
 
 # Remove data out of the growing season (= Jun - Sep)
 GPP = GPP.drop(GPP.index[GPP.index.month.isin([1, 2, 3, 4, 5, 10, 11, 12])])
@@ -31,7 +35,7 @@ WTD_8D = WTD.resample('8D').mean()
 PAR_8D = PAR.resample('8D').mean()
 
 # Normalization
-GPPn_8D = GPP_8D
+GPPn_8D = GPP_8D/PAR_8D
 
 # Refill the timeseries to a daily resolution, this is needed for the anomaly calculations
 GPPn_1D = GPPn_8D.resample('1D').bfill()
@@ -49,7 +53,7 @@ GPPn_shortAnom8d = GPPn_shortAnom.resample('8D').first()
 PAR_shortAnom8d = PAR_shortAnom.resample('8D').first()
 
 # Model short term anomalies
-coef_s, WTD_opt_s, n_corr_s, fp_values_s, p_values_s, Rsq_s = cal_WaterStressModel(GPPn_shortAnom8d, WTD_shortAnom8d, WTD_8D, WTD_8D.index)
+coef_s, WTD_opt_s, n_corr_s, fp_values_s, p_values_s, Rsq_s = cal_WaterStressModel(GPPn_shortAnom8d, WTD_shortAnom8d, WTD_8D, 1, WTD_8D.index)
 
 
 print('-------------------------------------------------------------')
@@ -87,7 +91,7 @@ PAR_longAnom8d = PAR_longAnom.resample('8D').first()
 GPPn_longAnom8d = GPPn_longAnom.resample('8D').first()
 
 # Model long term anomalies
-coef_l, WTD_opt_l, n_corr_l, fp_values_l, p_values_l, Rsq_l = cal_WaterStressModel(GPPn_longAnom8d, WTD_longAnom8d, WTD_8D, WTD_8D.index)
+coef_l, WTD_opt_l, n_corr_l, fp_values_l, p_values_l, Rsq_l = cal_WaterStressModel(GPPn_longAnom8d, WTD_longAnom8d, WTD_8D, 1, WTD_8D.index)
 
 
 print('-------------------------------------------------------------')
