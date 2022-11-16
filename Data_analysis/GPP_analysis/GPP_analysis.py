@@ -29,6 +29,19 @@ GPP = GPP.drop(GPP.index[GPP.index.month.isin([1, 2, 3, 4, 5, 10, 11, 12])])
 PAR = PAR.drop(PAR.index[PAR.index.month.isin([1, 2, 3, 4, 5, 10, 11, 12])])
 WTD = WTD.drop(WTD.index[WTD.index.month.isin([1, 2, 3, 4, 5, 10, 11, 12])])
 
+GPP_1D = GPP.resample('1D').mean()
+WTD_1D = WTD.resample('1D').mean()
+PAR_1D = PAR.resample('1D').mean()
+
+# Cloud filter: remove the lowest 10% PAR data of every month
+months = PAR_1D.index.month
+for m in [6, 7, 8, 9]:
+    PAR_1D_m = np.where(months == m, PAR_1D, np.nan)
+    PAR_cloud = PAR[PAR > np.nanquantile(PAR_1D_m, 0.10)]
+    GPP = GPP[PAR > np.nanquantile(PAR_1D_m, 0.10)]
+    WTD = WTD[PAR > np.nanquantile(PAR_1D_m, 0.10)]
+    PAR = PAR_cloud
+
 # Average to different resolution, coarser resolution reduces the error
 GPP_8D = GPP.resample('8D').mean()
 WTD_8D = WTD.resample('8D').mean()
