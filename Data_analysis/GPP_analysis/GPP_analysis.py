@@ -7,7 +7,7 @@ time_string = 'x_tv'
 WTD_string = 'wt'
 PAR_string = 'solar_f'
 write = False
-description = 'Resolution 8D, GPP, mean anomalies'
+description = 'Resolution 8D, GPP, mb_met_flux_data_1998_2018.txt'
 # input_file = 'CA_MER_GPP_analysis.csv'
 input_file = 'mb_met_flux_data_1998_2018.txt'
 input_dir = '/data/leuven/336/vsc33653/Data/GPP_FluxTower/'
@@ -29,17 +29,22 @@ GPP = GPP.drop(GPP.index[GPP.index.month.isin([1, 2, 3, 4, 5, 10, 11, 12])])
 PAR = PAR.drop(PAR.index[PAR.index.month.isin([1, 2, 3, 4, 5, 10, 11, 12])])
 WTD = WTD.drop(WTD.index[WTD.index.month.isin([1, 2, 3, 4, 5, 10, 11, 12])])
 
-GPP_1D = GPP.resample('1D').mean()
-WTD_1D = WTD.resample('1D').mean()
-PAR_1D = PAR.resample('1D').mean()
+# Focus on noon, around SIF measurements
+hours = PAR.index.hour
+cond_hours = (hours >= 11) & (hours <= 13)
+GPP = GPP[cond_hours]
+WTD = WTD[cond_hours]
+PAR = PAR[cond_hours]
 
-# Cloud filter: remove the lowest 10% PAR data of every month
-months = PAR_1D.index.month
+
+# Cloud filter: remove the lowest PAR data of every month
+cloud_filter = 0.30
 for m in [6, 7, 8, 9]:
-    PAR_1D_m = np.where(months == m, PAR_1D, np.nan)
-    PAR_cloud = PAR[PAR > np.nanquantile(PAR_1D_m, 0.10)]
-    GPP = GPP[PAR > np.nanquantile(PAR_1D_m, 0.10)]
-    WTD = WTD[PAR > np.nanquantile(PAR_1D_m, 0.10)]
+    months = PAR.index.month
+    PAR_m = np.where(months == m, PAR, np.nan)
+    PAR_cloud = PAR[PAR > np.nanquantile(PAR_m, cloud_filter)]
+    GPP = GPP[PAR > np.nanquantile(PAR_m, cloud_filter)]
+    WTD = WTD[PAR > np.nanquantile(PAR_m, cloud_filter)]
     PAR = PAR_cloud
 
 # Average to different resolution, coarser resolution reduces the error
