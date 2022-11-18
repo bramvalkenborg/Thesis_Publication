@@ -11,9 +11,9 @@ description = 'Resolution 8D, GPP, mb_met_flux_data_1998_2018.txt'
 # input_file = 'CA_MER_GPP_analysis.csv'
 input_file = 'mb_met_flux_data_1998_2018.txt'
 input_dir = '/data/leuven/336/vsc33653/Data/GPP_FluxTower/'
-input_dir = '/data/leuven/317/vsc31786/peatland_data/GPP/'
+#input_dir = '/data/leuven/317/vsc31786/peatland_data/GPP/'
 output_file = '/data/leuven/336/vsc33653/OUTPUT_pub/GPP_output.txt'
-output_file = '/scratch/leuven/317/vsc31786/GPP/GPP_output.txt'
+#output_file = '/scratch/leuven/317/vsc31786/GPP/GPP_output.txt'
 p = 1
 
 # Load the data
