@@ -58,10 +58,10 @@ PAR_8D = PAR.resample('8D').mean()
 GPPn_8D = GPP_8D/PAR_8D
 
 # Refill the timeseries to a daily resolution, this is needed for the anomaly calculations
-GPPn_1D = GPPn_8D.resample('1D').bfill()
-WTD_1D = WTD_8D.resample('1D').bfill()
-PAR_1D = PAR_8D.resample('1D').bfill()
-GPPn_1D = GPPn_8D.resample('1D').ffill(limit=7)
+#GPPn_1D = GPPn_8D.resample('1D').bfill()
+#WTD_1D = WTD_8D.resample('1D').bfill()
+#PAR_1D = PAR_8D.resample('1D').bfill()
+GPPn_1D = GPPn_8D.resample('1D').ffill(limit=7) # set fill limit to avoid filling of long gaps
 WTD_1D = WTD_8D.resample('1D').ffill(limit=7)
 PAR_1D = PAR_8D.resample('1D').ffill(limit=7)
 
@@ -71,9 +71,9 @@ GPPn_shortAnom = calc_anom(GPPn_1D, longterm=False)
 PAR_shortAnom = calc_anom(PAR_1D, longterm=False)
 
 # Change the resolution of the 1D anomalies to 8D anomalies
-WTD_shortAnom8d = WTD_shortAnom.resample('8D').first()
-GPPn_shortAnom8d = GPPn_shortAnom.resample('8D').first()
-PAR_shortAnom8d = PAR_shortAnom.resample('8D').first()
+#WTD_shortAnom8d = WTD_shortAnom.resample('8D').first()
+#GPPn_shortAnom8d = GPPn_shortAnom.resample('8D').first()
+#PAR_shortAnom8d = PAR_shortAnom.resample('8D').first()
 WTD_shortAnom8d = WTD_shortAnom.resample('8D').mean()
 GPPn_shortAnom8d = GPPn_shortAnom.resample('8D').mean()
 PAR_shortAnom8d = PAR_shortAnom.resample('8D').mean()
