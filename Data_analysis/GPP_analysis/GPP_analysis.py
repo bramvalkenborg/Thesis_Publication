@@ -11,7 +11,9 @@ description = 'Resolution 8D, GPP, mb_met_flux_data_1998_2018.txt'
 # input_file = 'CA_MER_GPP_analysis.csv'
 input_file = 'mb_met_flux_data_1998_2018.txt'
 input_dir = '/data/leuven/336/vsc33653/Data/GPP_FluxTower/'
+input_dir = '/data/leuven/317/vsc31786/peatland_data/GPP/'
 output_file = '/data/leuven/336/vsc33653/OUTPUT_pub/GPP_output.txt'
+output_file = '/scratch/leuven/317/vsc31786/GPP/GPP_output.txt'
 p = 1
 
 # Load the data
@@ -59,6 +61,9 @@ GPPn_8D = GPP_8D/PAR_8D
 GPPn_1D = GPPn_8D.resample('1D').bfill()
 WTD_1D = WTD_8D.resample('1D').bfill()
 PAR_1D = PAR_8D.resample('1D').bfill()
+GPPn_1D = GPPn_8D.resample('1D').ffill(limit=7)
+WTD_1D = WTD_8D.resample('1D').ffill(limit=7)
+PAR_1D = PAR_8D.resample('1D').ffill(limit=7)
 
 # Calculate the anomalies
 WTD_shortAnom = calc_anom(WTD_1D, longterm=False)
@@ -69,6 +74,9 @@ PAR_shortAnom = calc_anom(PAR_1D, longterm=False)
 WTD_shortAnom8d = WTD_shortAnom.resample('8D').first()
 GPPn_shortAnom8d = GPPn_shortAnom.resample('8D').first()
 PAR_shortAnom8d = PAR_shortAnom.resample('8D').first()
+WTD_shortAnom8d = WTD_shortAnom.resample('8D').mean()
+GPPn_shortAnom8d = GPPn_shortAnom.resample('8D').mean()
+PAR_shortAnom8d = PAR_shortAnom.resample('8D').mean()
 
 # Model short term anomalies
 coef_s, WTD_opt_s, n_corr_s, fp_values_s, p_values_s, Rsq_s = cal_WaterStressModel(GPPn_shortAnom8d, WTD_shortAnom8d, WTD_8D, 1, WTD_8D.index)
