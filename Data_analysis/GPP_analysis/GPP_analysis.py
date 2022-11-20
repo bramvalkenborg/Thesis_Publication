@@ -1,11 +1,23 @@
-from thesis_pub_tools import *
+# from thesis_pub_tools import *
 from validation_good_practice.ancillary.metrics import correct_n
 from patsy import dmatrices
 import statsmodels_adapted.api as sm
+import pandas as pd
+import numpy as np
+from thesis_pub_tools import calc_anom, cal_WaterStressModel
+import datetime
+import matplotlib.pyplot as plt
+import matplotlib as mpl
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 # INPUT
 # ----------------------------------------------------------------------------------------------------------------------
+
+# source_path = '/data/leuven/336/vsc33653/'
+# source_path = '/data/leuven/317/vsc31786/'
+source_path = '/Users/bramvalkenborg/Library/CloudStorage/OneDrive-KULeuven/Thesis/Publication/Resubmission/'
+
 
 # Adapt the variables to the right column names for time, WTD and PAR
 time_string = 'TIMESTAMP_END'
@@ -21,10 +33,10 @@ description = 'Resolution 8D, GPP/PAR'
 # input_file = 'CA_MER_GPP_analysis.csv'
 input_file = 'US-Los_HH_2000-2022.csv'
 # input_file = 'mb_met_flux_data_1998_2018.txt'
-input_dir = '/data/leuven/336/vsc33653/Data/GPP_FluxTower/'
-#input_dir = '/data/leuven/317/vsc31786/peatland_data/GPP/'
-output_file = '/data/leuven/336/vsc33653/OUTPUT_pub/GPP_output.txt'
-#output_file = '/scratch/leuven/317/vsc31786/GPP/GPP_output.txt'
+input_dir = source_path + 'Data/GPP_FluxTower/'
+# input_dir = source_path + 'peatland_data/GPP/'
+output_file = source_path + 'OUTPUT_pub/GPP_output.txt'
+# output_file = source_path + 'GPP/GPP_output.txt'
 
 # Set the input parameters
 p = 1
@@ -74,10 +86,10 @@ PAR_8D = PAR.resample('8D').mean()
 GPPn_8D = GPP_8D/PAR_8D
 
 # Refill the timeseries to a daily resolution, this is needed for the anomaly calculations
-#GPPn_1D = GPPn_8D.resample('1D').bfill()
-#WTD_1D = WTD_8D.resample('1D').bfill()
-#PAR_1D = PAR_8D.resample('1D').bfill()
-GPPn_1D = GPPn_8D.resample('1D').ffill(limit=7) # set fill limit to avoid filling of long gaps
+# GPPn_1D = GPPn_8D.resample('1D').bfill()
+# WTD_1D = WTD_8D.resample('1D').bfill()
+# PAR_1D = PAR_8D.resample('1D').bfill()
+GPPn_1D = GPPn_8D.resample('1D').ffill(limit=7)     # set fill limit to avoid filling of long gaps
 WTD_1D = WTD_8D.resample('1D').ffill(limit=7)
 PAR_1D = PAR_8D.resample('1D').ffill(limit=7)
 
@@ -87,9 +99,9 @@ GPPn_shortAnom = calc_anom(GPPn_1D, longterm=False)
 PAR_shortAnom = calc_anom(PAR_1D, longterm=False)
 
 # Change the resolution of the 1D anomalies to 8D anomalies
-#WTD_shortAnom8d = WTD_shortAnom.resample('8D').first()
-#GPPn_shortAnom8d = GPPn_shortAnom.resample('8D').first()
-#PAR_shortAnom8d = PAR_shortAnom.resample('8D').first()
+# WTD_shortAnom8d = WTD_shortAnom.resample('8D').first()
+# GPPn_shortAnom8d = GPPn_shortAnom.resample('8D').first()
+# PAR_shortAnom8d = PAR_shortAnom.resample('8D').first()
 WTD_shortAnom8d = WTD_shortAnom.resample('8D').mean()
 GPPn_shortAnom8d = GPPn_shortAnom.resample('8D').mean()
 PAR_shortAnom8d = PAR_shortAnom.resample('8D').mean()
