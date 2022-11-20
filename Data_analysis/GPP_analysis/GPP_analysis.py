@@ -3,27 +3,44 @@ from validation_good_practice.ancillary.metrics import correct_n
 from patsy import dmatrices
 import statsmodels_adapted.api as sm
 
-time_string = 'x_tv'
-WTD_string = 'wt'
-PAR_string = 'solar_f'
+# ----------------------------------------------------------------------------------------------------------------------
+# INPUT
+# ----------------------------------------------------------------------------------------------------------------------
+
+# Adapt the variables to the right column names for time, WTD and PAR
+time_string = 'TIMESTAMP_END'
+format_time = '%Y%m%d%H%M'
+WTD_string = 'WTD'
+PAR_string = 'PPFD_IN_F_1_1_1'
+
+# Option to write the data to a separate file
 write = False
-description = 'Resolution 8D, GPP, mb_met_flux_data_1998_2018.txt'
+description = 'Resolution 8D, GPP/PAR'
+
+# Select the right input file, output directory and output file
 # input_file = 'CA_MER_GPP_analysis.csv'
-input_file = 'mb_met_flux_data_1998_2018.txt'
+input_file = 'US-Los_HH_2000-2022.csv'
+# input_file = 'mb_met_flux_data_1998_2018.txt'
 input_dir = '/data/leuven/336/vsc33653/Data/GPP_FluxTower/'
 #input_dir = '/data/leuven/317/vsc31786/peatland_data/GPP/'
 output_file = '/data/leuven/336/vsc33653/OUTPUT_pub/GPP_output.txt'
 #output_file = '/scratch/leuven/317/vsc31786/GPP/GPP_output.txt'
+
+# Set the input parameters
 p = 1
+cloud_filter = 0.10
+# ----------------------------------------------------------------------------------------------------------------------
+
 
 # Load the data
 Df = pd.read_csv(input_dir+input_file)
-Df['Time'] = pd.to_datetime(Df[time_string])
+Df['Time'] = pd.to_datetime(Df[time_string], format=format_time)
 del Df[time_string]
+Df.replace(-9999, np.nan, inplace=True)
 Df = Df.set_index(['Time'])
 WTD = pd.Series(Df[WTD_string])
-WTD = WTD/100
-GPP = pd.Series(Df['nep_f']+Df['re_f'])
+WTD = WTD
+GPP = pd.Series(Df['GPP_F'])
 PAR = pd.Series(Df[PAR_string])
 
 # Remove data out of the growing season (= Jun - Sep)
@@ -40,7 +57,6 @@ PAR = PAR[cond_hours]
 
 
 # Cloud filter: remove the lowest PAR data of every month
-cloud_filter = 0.30
 for m in [6, 7, 8, 9]:
     months = PAR.index.month
     PAR_m = np.where(months == m, PAR, np.nan)
