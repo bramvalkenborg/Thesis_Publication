@@ -1,7 +1,3 @@
-# from thesis_pub_tools import *
-from validation_good_practice.ancillary.metrics import correct_n
-from patsy import dmatrices
-import statsmodels_adapted.api as sm
 import pandas as pd
 import numpy as np
 from thesis_pub_tools import calc_anom, cal_WaterStressModel
@@ -13,7 +9,6 @@ import matplotlib as mpl
 # ----------------------------------------------------------------------------------------------------------------------
 # INPUT
 # ----------------------------------------------------------------------------------------------------------------------
-
 # source_path = '/data/leuven/336/vsc33653/'
 # source_path = '/data/leuven/317/vsc31786/'
 source_path = '/Users/bramvalkenborg/Library/CloudStorage/OneDrive-KULeuven/Thesis/Publication/Resubmission/'
@@ -23,7 +18,7 @@ source_path = '/Users/bramvalkenborg/Library/CloudStorage/OneDrive-KULeuven/Thes
 time_string = 'TIMESTAMP_END'
 format_time = '%Y%m%d%H%M'
 WTD_string = 'WTD'
-PAR_string = 'PPFD_IN_F_1_1_1'
+PAR_string = 'SW_IN_F'
 
 # Option to write the data to a separate file
 write = False
@@ -31,10 +26,13 @@ description = 'Resolution 8D, GPP/PAR'
 
 # Select the right input file, output directory and output file
 # input_file = 'CA_MER_GPP_analysis.csv'
-input_file = 'US-Los_HH_2000-2022.csv'
+# input_file = 'US-Los_HH_2000-2022.csv'
 # input_file = 'mb_met_flux_data_1998_2018.txt'
+input_file = 'FLX_SE-Deg_FLUXNET2015_FULLSET_HH_2001-2020_beta-3_WTD.csv'
+
 input_dir = source_path + 'Data/GPP_FluxTower/'
 # input_dir = source_path + 'peatland_data/GPP/'
+
 output_file = source_path + 'OUTPUT_pub/GPP_output.txt'
 # output_file = source_path + 'GPP/GPP_output.txt'
 
@@ -46,13 +44,16 @@ cloud_filter = 0.10
 
 # Load the data
 Df = pd.read_csv(input_dir+input_file)
-Df['Time'] = pd.to_datetime(Df[time_string], format=format_time)
+if format_time == '':
+    Df['Time'] = pd.to_datetime(Df[time_string])
+else:
+    Df['Time'] = pd.to_datetime(Df[time_string], format=format_time)
 del Df[time_string]
 Df.replace(-9999, np.nan, inplace=True)
 Df = Df.set_index(['Time'])
 WTD = pd.Series(Df[WTD_string])
 WTD = WTD
-GPP = pd.Series(Df['GPP_F'])
+GPP = pd.Series(Df['GPP_DT_CUT_REF'])
 PAR = pd.Series(Df[PAR_string])
 
 # Remove data out of the growing season (= Jun - Sep)
@@ -63,9 +64,16 @@ WTD = WTD.drop(WTD.index[WTD.index.month.isin([1, 2, 3, 4, 5, 10, 11, 12])])
 # Focus on noon, around SIF measurements
 hours = PAR.index.hour
 cond_hours = (hours >= 11) & (hours <= 13)
+if input_file == 'FLX_SE-Deg_FLUXNET2015_FULLSET_HH_2001-2020_beta-3_WTD.csv':
+    cond_WTD = (hours >= 0) & (hours <= 2)
+    WTD = WTD[cond_WTD]
+else:
+    WTD = WTD[cond_hours]
 GPP = GPP[cond_hours]
-WTD = WTD[cond_hours]
 PAR = PAR[cond_hours]
+
+if input_file == 'FLX_SE-Deg_FLUXNET2015_FULLSET_HH_2001-2020_beta-3_WTD.csv':
+    WTD.index = GPP.index
 
 
 # Cloud filter: remove the lowest PAR data of every month
@@ -111,7 +119,7 @@ coef_s, WTD_opt_s, n_corr_s, fp_values_s, p_values_s, Rsq_s = cal_WaterStressMod
 
 
 print('-------------------------------------------------------------')
-print('Short term results')
+print('Short-term results')
 print('-------------------------------------------------------------')
 print('Alpha: '+str(coef_s[0]))
 print('Beta: '+str(coef_s[1]))
