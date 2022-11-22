@@ -4,6 +4,7 @@ from thesis_pub_tools import calc_anom, cal_WaterStressModel
 import datetime
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+from GPP_datasets import load_dataset
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -13,22 +14,15 @@ import matplotlib as mpl
 # source_path = '/data/leuven/317/vsc31786/'
 source_path = '/Users/bramvalkenborg/Library/CloudStorage/OneDrive-KULeuven/Thesis/Publication/Resubmission/'
 
-
-# Adapt the variables to the right column names for time, WTD and PAR
-time_string = 'TIMESTAMP_END'
-format_time = '%Y%m%d%H%M'
-WTD_string = 'WTD'
-PAR_string = 'SW_IN_F'
-
-# Option to write the data to a separate file
-write = False
-description = 'Resolution 8D, GPP/PAR'
-
 # Select the right input file, output directory and output file
 # input_file = 'CA_MER_GPP_analysis.csv'
 # input_file = 'US-Los_HH_2000-2022.csv'
 # input_file = 'mb_met_flux_data_1998_2018.txt'
 input_file = 'FLX_SE-Deg_FLUXNET2015_FULLSET_HH_2001-2020_beta-3_WTD.csv'
+
+# Option to write the data to a separate file
+write = False
+description = 'Resolution 8D, GPP/PAR'
 
 input_dir = source_path + 'Data/GPP_FluxTower/'
 # input_dir = source_path + 'peatland_data/GPP/'
@@ -41,6 +35,8 @@ p = 1
 cloud_filter = 0.10
 # ----------------------------------------------------------------------------------------------------------------------
 
+# Load the column names
+time_string, format_time, WTD_string, PAR_string, GPP_string = load_dataset(input_file)
 
 # Load the data
 Df = pd.read_csv(input_dir+input_file)
