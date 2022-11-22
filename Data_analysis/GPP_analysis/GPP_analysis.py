@@ -85,6 +85,11 @@ for m in [6, 7, 8, 9]:
     WTD = WTD[PAR > np.nanquantile(PAR_m, cloud_filter)]
     PAR = PAR_cloud
 
+cond_nan = np.isnan(WTD) | np.isnan(GPP) | np.isnan(PAR)
+WTD[cond_nan.values] = np.nan
+GPP[cond_nan.values] = np.nan
+PAR[cond_nan.values] = np.nan
+
 # Average to different resolution, coarser resolution reduces the error
 GPP_8D = GPP.resample('8D').mean()
 WTD_8D = WTD.resample('8D').mean()
