@@ -33,6 +33,7 @@ output_file = source_path + 'OUTPUT_pub/GPP_output.txt'
 # Set the input parameters
 p = 1
 cloud_filter = 0.10
+description = description + ', cloud filter: ' +str(cloud_filter)
 # ----------------------------------------------------------------------------------------------------------------------
 
 # Load the column names
@@ -48,8 +49,9 @@ del Df[time_string]
 Df.replace(-9999, np.nan, inplace=True)
 Df = Df.set_index(['Time'])
 WTD = pd.Series(Df[WTD_string])
-WTD = WTD
-GPP = pd.Series(Df['GPP_DT_CUT_REF'])
+if input_file == 'CA_MER_GPP_analysis.csv':
+    WTD = WTD/100
+GPP = pd.Series(Df[GPP_string])
 PAR = pd.Series(Df[PAR_string])
 
 # Remove data out of the growing season (= Jun - Sep)
@@ -210,7 +212,7 @@ GPP_seas_8D = seas(GPP_8D, time=GPPn_8D.index)
 GPP_clim_8D = clim(GPP_8D, time=GPPn_8D.index)
 
 # Timeseries
-fig, (ax1, ax2, ax3, ax4) = plt.subplots(nrows=4, ncols=1)
+fig, (ax1, ax2, ax3, ax4) = plt.subplots(nrows=4, ncols=1, figsize=(10, 7))
 GPP_8D.plot(ax=ax1, color='red')
 GPP_seas_8D.plot(ax=ax1, color='grey')
 GPP_clim_8D.plot(ax=ax1, color='grey', linestyle='--')
@@ -227,7 +229,9 @@ ax1.set_ylabel('GPP')
 ax2.set_ylabel('PAR')
 ax3.set_ylabel('GPP/PAR')
 ax4.set_ylabel('WTD')
-
+fig.tight_layout()
+if write:
+    plt.savefig(source_path + 'OUTPUT_pub/'+input_file[:-4]+'_Timeseries.png')
 
 plt.figure()
 plt.scatter(GPP_8D, PAR_8D)
