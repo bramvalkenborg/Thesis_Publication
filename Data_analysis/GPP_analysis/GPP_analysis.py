@@ -17,8 +17,8 @@ source_path = '/Users/bramvalkenborg/Library/CloudStorage/OneDrive-KULeuven/Thes
 # Select the right input file, output directory and output file
 # input_file = 'CA_MER_GPP_analysis.csv'
 # input_file = 'US-Los_HH_2000-2022.csv'
-# input_file = 'mb_met_flux_data_1998_2018.txt'
-input_file = 'FLX_SE-Deg_FLUXNET2015_FULLSET_HH_2001-2020_beta-3_WTD.csv'
+input_file = 'mb_met_flux_data_1998_2018.txt'
+# input_file = 'FLX_SE-Deg_FLUXNET2015_FULLSET_HH_2001-2020_beta-3_WTD.csv'
 
 # Option to write the data to a separate file
 write = False
@@ -33,7 +33,7 @@ output_file = source_path + 'OUTPUT_pub/GPP_output.txt'
 # Set the input parameters
 p = 1
 cloud_filter = 0.10
-description = description + ', cloud filter: ' +str(cloud_filter)
+description = description + ', cloud filter: ' + str(cloud_filter)
 # ----------------------------------------------------------------------------------------------------------------------
 
 # Load the column names
@@ -49,9 +49,12 @@ del Df[time_string]
 Df.replace(-9999, np.nan, inplace=True)
 Df = Df.set_index(['Time'])
 WTD = pd.Series(Df[WTD_string])
-if input_file == 'CA_MER_GPP_analysis.csv':
+if input_file == 'CA_MER_GPP_analysis.csv' or input_file == 'mb_met_flux_data_1998_2018.txt':
     WTD = WTD/100
-GPP = pd.Series(Df[GPP_string])
+if input_file == 'mb_met_flux_data_1998_2018.txt':
+    GPP = pd.Series(Df['nee']-Df['re_f'])
+else:
+    GPP = pd.Series(Df[GPP_string])
 PAR = pd.Series(Df[PAR_string])
 
 # Remove data out of the growing season (= Jun - Sep)
