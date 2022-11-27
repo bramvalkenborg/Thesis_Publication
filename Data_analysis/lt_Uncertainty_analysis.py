@@ -114,22 +114,33 @@ SIF_lAnom, WTD_lAnom = long_anom(lat, lon, time, SIFnorm, WTD)
 # stats.bootstrap((SIF_sAnom[0, 0, :], WTD_sAnom[0, 0, :], WTD[0, 0, :], time,), cal_WaterStressModel)
 
 # Bootstrap analysis: Long term
-WTDopt_l = np.zeros((len(lat), len(lon)))
-WTD_CI_5_l = np.zeros((len(lat), len(lon)))
-WTD_CI_95_l = np.zeros((len(lat), len(lon)))
+nRuns = 100
+WTDopt_l_mean = np.zeros((len(lat), len(lon)))
+WTDopt_l_CI5 = np.zeros((len(lat), len(lon)))
+WTDopt_l_CI95 = np.zeros((len(lat), len(lon)))
 for ilat in range(len(lat)):
     print('Long term bootstrap analysis: ' + str(round((ilat / len(lat)) * 100, 2)) + '%')
     for ilon in range(len(lon)):
         if not np.isnan(WTD).all() and not np.isnan(SIF_lAnom).all() and not np.isnan(WTD_lAnom).all():
-            WTDopt_l[ilat, ilon], WTD_CI_5_l[ilat, ilon], WTD_CI_95_l[ilat, ilon] = Bootstrap_uncertainty(SIF_lAnom[ilat, ilon, :], WTD_lAnom[ilat, ilon, :], WTD[ilat, ilon, :], 100, time)
+            random_data = np.zeros((len(time), 3, nRuns))
+            time_rand = np.random.choice(SIF_lAnom.shape[2], (SIF_lAnom.shape[2], nRuns), replace=True)
+            random_data[:, 0, :] = SIF_lAnom[ilat, ilon, time_rand]
+            random_data[:, 1, :] = WTD_lAnom[ilat, ilon, time_rand]
+            random_data[:, 2, :] = WTD[ilat, ilon, time_rand]
+            WTDopt_pixel = np.zeros((nRuns))
+            for i in range(0, nRuns):
+                WTDopt_pixel[i] = cal_WaterStressModel(random_data[:, 0, i], random_data[:, 1, i], random_data[:, 2, i], 1, time)[1]
+                WTDopt_l_mean[ilat, ilon] = np.nanmean(WTDopt_pixel)
+                WTDopt_l_CI5[ilat, ilon] = np.nanquantile(WTDopt_pixel, 0.05)
+                WTDopt_l_CI95[ilat, ilon] = np.nanquantile(WTDopt_pixel, 0.95)
         else:
-            WTDopt_l[ilat, ilon] = np.nan
-            WTD_CI_5_l[ilat, ilon] = np.nan
-            WTD_CI_95_l[ilat, ilon] = np.nan
+            WTDopt_l_mean[ilat, ilon] = np.nan
+            WTDopt_l_CI5[ilat, ilon] = np.nan
+            WTDopt_l_CI95[ilat, ilon] = np.nan
 
-WTD_CI_5_mean_l = np.nanmean(WTD_CI_5_l)
-WTD_CI_95_mean_l = np.nanmean(WTD_CI_95_l)
-WTDopt_mean_l = np.nanmean(WTDopt_l)
+WTD_CI_5_mean_l = np.nanmean(WTDopt_l_CI5)
+WTD_CI_95_mean_l = np.nanmean(WTDopt_l_CI95)
+WTDopt_mean_l = np.nanmean(WTDopt_l_mean)
 
 with open(output_file, 'a') as f:
     f.write('--------------------------------------------------------------------------------------\n')
