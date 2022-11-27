@@ -116,8 +116,6 @@ SIF_sAnom, WTD_sAnom = short_anom(lat, lon, time, SIFnorm, WTD)
 # Bootstrap analysis
 nRuns = 100
 WTDopt_s_mean = np.zeros((len(lat), len(lon)))
-WTDopt_s_CI5 = np.zeros((len(lat), len(lon)))
-WTDopt_s_CI95 = np.zeros((len(lat), len(lon)))
 for ilat in range(len(lat)):
     print('Short term bootstrap analysis: ' + str(round((ilat / len(lat)) * 100, 2)) + '%')
     for ilon in range(len(lon)):
@@ -131,15 +129,11 @@ for ilat in range(len(lat)):
             for i in range(0, nRuns):
                 WTDopt_pixel[i] = cal_WaterStressModel(random_data[:, 0, i], random_data[:, 1, i], random_data[:, 2, i], 1, time)[1]
                 WTDopt_s_mean[ilat, ilon] = np.nanmean(WTDopt_pixel)
-                WTDopt_s_CI5[ilat, ilon] = np.nanquantile(WTDopt_pixel, 0.05)
-                WTDopt_s_CI95[ilat, ilon] = np.nanquantile(WTDopt_pixel, 0.95)
         else:
             WTDopt_s_mean[ilat, ilon] = np.nan
-            WTDopt_s_CI5[ilat, ilon] = np.nan
-            WTDopt_s_CI95[ilat, ilon] = np.nan
 
-WTD_CI_5_mean_s = np.nanmean(WTDopt_s_CI5)
-WTD_CI_95_mean_s = np.nanmean(WTDopt_s_CI95)
+WTD_CI_5_mean_s = np.nanquantile(WTDopt_s_mean, 0.05)
+WTD_CI_95_mean_s = np.nanquantile(WTDopt_s_mean, 0.95)
 WTDopt_mean_s = np.nanmean(WTDopt_s_mean)
 
 with open(output_file, 'a') as f:
