@@ -123,10 +123,10 @@ for ilat in range(len(lat)):
     for ilon in range(len(lon)):
         if not np.isnan(WTD).all() and not np.isnan(SIF_sAnom).all() and not np.isnan(WTD_sAnom).all():
             random_data = np.zeros((len(time), 3, nRuns))
-            time_rand = np.random.choice(SIF_sAnom.shape[0], (SIF_sAnom.size, nRuns), replace=True)
-            random_data[:, 0, :] = SIF_sAnom[time_rand]
-            random_data[:, 1, :] = WTD_sAnom[time_rand]
-            random_data[:, 2, :] = WTD[time_rand]
+            time_rand = np.random.choice(SIF_sAnom.shape[2], (SIF_sAnom.shape[2], nRuns), replace=True)
+            random_data[:, 0, :] = SIF_sAnom[ilat, ilon, time_rand]
+            random_data[:, 1, :] = WTD_sAnom[ilat, ilon, time_rand]
+            random_data[:, 2, :] = WTD[ilat, ilon, time_rand]
             WTDopt_pixel = np.zeros((nRuns))
             for i in range(0, nRuns):
                 WTDopt_pixel[i] = cal_WaterStressModel(random_data[:, 0, i], random_data[:, 1, i], random_data[:, 2, i], 1, time)[1]
