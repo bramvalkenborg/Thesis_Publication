@@ -116,25 +116,24 @@ SIF_sAnom, WTD_sAnom = short_anom(lat, lon, time, SIFnorm, WTD)
 # Bootstrap analysis: repeat the calculation of the average WTDopt n times.
 # For which you calculate the mean and confidence intervals
 nRuns = 100
-WTDopt_s_mean = np.zeros((len(lat), len(lon)))
 WTDopt = np.zeros((len(lat), len(lon), nRuns))
+time_rand = np.random.choice(SIF_sAnom.shape[2], (SIF_sAnom.shape[2], nRuns), replace=True)
 for i in range(0, nRuns):
     print('Short term bootstrap analysis: ' + str(round((i / nRuns) * 100, 2)) + '%')
-    time_rand = np.random.choice(SIF_sAnom.shape[2], (SIF_sAnom.shape[2], nRuns), replace=True)
     for ilat in range(len(lat)):
         for ilon in range(len(lon)):
             if not np.isnan(WTD).all() and not np.isnan(SIF_sAnom).all() and not np.isnan(WTD_sAnom).all():
                 random_data = np.zeros((len(time), 3))
-                random_data[:, 0] = SIF_sAnom[ilat, ilon, time_rand]
-                random_data[:, 1] = WTD_sAnom[ilat, ilon, time_rand]
-                random_data[:, 2] = WTD[ilat, ilon, time_rand]
+                random_data[:, 0] = SIF_sAnom[ilat, ilon, time_rand[:, i]]
+                random_data[:, 1] = WTD_sAnom[ilat, ilon, time_rand[:, i]]
+                random_data[:, 2] = WTD[ilat, ilon, time_rand[:, i]]
                 WTDopt[ilat, ilon, i] = cal_WaterStressModel(random_data[:, 0], random_data[:, 1], random_data[:, 2], 1, time)[1]
             else:
                 WTDopt[ilat, ilon, i] = np.nan
 
 WTDopt_mean_s = np.nanmean(np.nanmean(WTDopt, axis=0), axis=0)
-WTD_CI_5_mean_s = np.nanquantile(WTDopt, 0.05)
-WTD_CI_95_mean_s = np.nanquantile(WTDopt, 0.95)
+WTD_CI_5_mean_s = np.nanquantile(WTDopt_mean_s, 0.05)
+WTD_CI_95_mean_s = np.nanquantile(WTDopt_mean_s, 0.95)
 
 with open(output_file, 'a') as f:
     f.write('--------------------------------------------------------------------------------------\n')
