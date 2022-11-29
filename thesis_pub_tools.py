@@ -19,7 +19,6 @@ max_window_wet              :   Calculates the 4-week window around the maximum 
 from netCDF4 import Dataset
 import matplotlib.pyplot as plt
 import matplotlib.dates as dates
-from SIF_tools.python.L2_tools import convert_time
 import numpy as np
 import mpl_scatter_density
 from matplotlib.colors import LinearSegmentedColormap
@@ -37,6 +36,8 @@ import datetime
 from validation_good_practice.ancillary.metrics import correct_n
 from patsy import dmatrices
 import statsmodels_adapted.api as sm
+from netCDF4 import num2date
+
 
 #-----------------------------------------------------------------------------------------------------------------------
 # Important variables that are often used
@@ -670,4 +671,10 @@ def Bootstrap_uncertainty(SIF_Anom, WTD_Anom, WTD, nRuns, time):
     WTD_CI_95 = np.nanquantile(WTD_opt, 0.95)
     return WTDopt_mean, WTD_CI_5, WTD_CI_95
 
+
+# Converts times in t_unit (string) and calendar t_cal (string) to a python datetime
+def convert_time(nctime, t_unit, t_cal, only_use_cftime_datetimes=False, only_use_python_datetimes=True):
+    datevar = []
+    datevar.append(num2date(nctime, units=t_unit, calendar=t_cal, only_use_cftime_datetimes=only_use_cftime_datetimes, only_use_python_datetimes=only_use_python_datetimes))	# Added the last 2 attributes
+    return datevar[0]
 
