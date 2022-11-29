@@ -13,7 +13,7 @@ Time_2021 = True
 SP_res = 0.2
 p = 1
 output_file = '/data/leuven/336/vsc33653/OUTPUT_pub/uncertainty_WTDopt.txt'
-output_file = '/scratch/leuven/317/vsc31786/uncertainty_WTDopt.txt'
+#output_file = '/scratch/leuven/317/vsc31786/uncertainty_WTDopt.txt'
 # ----------------------------
 corr = '_c30_pt' + str(round(peat_min * 100)) + '_SPres' + str(round(SP_res*10)) + '_pValue' + str(int(round(p*100)))
 

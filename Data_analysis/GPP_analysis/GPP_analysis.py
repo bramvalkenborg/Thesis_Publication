@@ -28,8 +28,8 @@ input_dir = source_path + 'Data/GPP_FluxTower/'
 # input_dir = source_path + 'peatland_data/GPP/'
 
 output_file = source_path + 'OUTPUT_pub/GPP_output.txt'
-# output_file = source_path + 'GPP/GPP_output.txt'
-output_file = '/scratch/leuven/317/vsc31786/GPP_output.txt'
+output_file = source_path + 'GPP/GPP_output.txt'
+#output_file = '/scratch/leuven/317/vsc31786/GPP_output.txt'
 
 # Set the input parameters
 p = 1
