@@ -13,6 +13,7 @@ Time_2021 = True
 SP_res = 0.2
 p = 1
 output_file = '/data/leuven/336/vsc33653/OUTPUT_pub/uncertainty_WTDopt.txt'
+output_file = '/scratch/leuven/317/vsc31786/uncertainty_WTDopt.txt'
 # ----------------------------
 corr = '_c30_pt' + str(round(peat_min * 100)) + '_SPres' + str(round(SP_res*10)) + '_pValue' + str(int(round(p*100)))
 
@@ -108,6 +109,7 @@ else:
     # OW = data_analysis_variable(OW2021_file5, 'OW', peat_min=peat_min, lat_lim=lat_lim, lon_lim=lon_lim, SP_res=SP_res,
     #                            Time_2021=Time_2021)
     nYears = 3
+
 
 SIF_sAnom, WTD_sAnom = short_anom(lat, lon, time, SIFnorm, WTD)
 

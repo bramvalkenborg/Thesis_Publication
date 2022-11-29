@@ -10,9 +10,9 @@ from GPP_datasets import load_dataset
 # ----------------------------------------------------------------------------------------------------------------------
 # INPUT
 # ----------------------------------------------------------------------------------------------------------------------
-# source_path = '/data/leuven/336/vsc33653/'
+source_path = '/data/leuven/336/vsc33653/'
 # source_path = '/data/leuven/317/vsc31786/'
-source_path = '/Users/bramvalkenborg/Library/CloudStorage/OneDrive-KULeuven/Thesis/Publication/Resubmission/'
+#source_path = '/Users/bramvalkenborg/Library/CloudStorage/OneDrive-KULeuven/Thesis/Publication/Resubmission/'
 
 # Select the right input file, output directory and output file
 # input_file = 'CA_MER_GPP_analysis.csv'
@@ -29,6 +29,7 @@ input_dir = source_path + 'Data/GPP_FluxTower/'
 
 output_file = source_path + 'OUTPUT_pub/GPP_output.txt'
 # output_file = source_path + 'GPP/GPP_output.txt'
+output_file = '/scratch/leuven/317/vsc31786/GPP_output.txt'
 
 # Set the input parameters
 p = 1
