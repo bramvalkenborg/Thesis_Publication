@@ -585,8 +585,8 @@ for p in np.random.randint(len(pixel_true[0]), size=200):
 
     fig.tight_layout()
 
-    ax5a.set_title('(c)', loc='left', fontsize=10)
-    ax6a.set_title('(f)', loc='left', fontsize=10)
+    ax5b.set_title('(c)', loc='left', fontsize=10)
+    ax6b.set_title('(f)', loc='left', fontsize=10)
     WTDplot_stDry = np.linspace(np.nanmin(WTD[ilat, ilon, :]), WTD_opt_st[ilat, ilon], 5)
     WTDplot_stWet = np.linspace(WTD_opt_st[ilat, ilon], np.nanmax(WTD[ilat, ilon, :]), 5)
     WTDplot_ltDry = np.linspace(np.nanmin(WTD[ilat, ilon, :]), WTD_opt_lt[ilat, ilon], 5)
