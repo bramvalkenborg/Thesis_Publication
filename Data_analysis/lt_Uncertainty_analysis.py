@@ -131,9 +131,9 @@ for i in range(0, nRuns):
             else:
                 WTDopt[ilat, ilon, i] = np.nan
 
-WTDopt_mean_l = np.nanmean(WTDopt, axis=(0, 1))
-WTD_CI_5_mean_l = np.nanquantile(WTDopt_mean_l, 0.05)
-WTD_CI_95_mean_l = np.nanquantile(WTDopt_mean_l, 0.95)
+WTDopt_median_l = np.nanmedian(WTDopt, axis=(0, 1))
+WTD_CI_5_median_l = np.nanquantile(WTDopt_median_l, 0.05)
+WTD_CI_95_median_l = np.nanquantile(WTDopt_median_l, 0.95)
 
 with open(output_file, 'a') as f:
     f.write('--------------------------------------------------------------------------------------\n')
@@ -147,8 +147,8 @@ with open(output_file, 'a') as f:
     f.write('   2021 included?: '+str(Time_2021)+'\n')
     f.write('   Spatial resolution: '+str(SP_res)+'\n')
     f.write('Long term analysis:\n')
-    f.write('   Upper limit: ' + str(WTD_CI_95_mean_l) + '\n')
-    f.write('   WTDopt: ' + str(WTDopt_mean_l) + '\n')
-    f.write('   Lower limit: ' + str(WTD_CI_5_mean_l) + '\n')
+    f.write('   Upper limit: ' + str(WTD_CI_95_median_l) + '\n')
+    f.write('   WTDopt: ' + str(np.nanmean(WTDopt_median_l)) + '\n') # -0.99
+    f.write('   Lower limit: ' + str(WTD_CI_5_median_l) + '\n')
     f.write('-------------------------------------------------------------\n')
     f.write('------------------------------------------------------------------------------------\n\n')
