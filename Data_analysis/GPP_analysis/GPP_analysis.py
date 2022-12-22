@@ -5,58 +5,43 @@ import datetime
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from GPP_datasets import load_dataset
-
+import copy
 
 # ----------------------------------------------------------------------------------------------------------------------
 # INPUT
 # ----------------------------------------------------------------------------------------------------------------------
 source_path = '/data/leuven/336/vsc33653/'
-# source_path = '/data/leuven/317/vsc31786/'
+source_path = '/data/leuven/317/vsc31786/'
 #source_path = '/Users/bramvalkenborg/Library/CloudStorage/OneDrive-KULeuven/Thesis/Publication/Resubmission/'
 
 # Select the right input file, output directory and output file
 # input_file = 'CA_MER_GPP_analysis.csv'
-# input_file = 'US-Los_HH_2000-2022.csv'
-input_file = 'mb_met_flux_data_1998_2018.txt'
-# input_file = 'FLX_SE-Deg_FLUXNET2015_FULLSET_HH_2001-2020_beta-3_WTD.csv'
+input_file = 'US-Los_HH_2000-2022.csv'
+#input_file = 'mb_met_flux_data_1998_2018.txt'
+#input_file = 'FLX_SE-Deg_FLUXNET2015_FULLSET_HH_2001-2020_beta-3.csv'
+#input_file = 'SFZ_S_2010_2020_hh_Michl.csv'
 
 # Option to write the data to a separate file
 write = False
 description = 'Resolution 8D, GPP/PAR'
 
 input_dir = source_path + 'Data/GPP_FluxTower/'
-# input_dir = source_path + 'peatland_data/GPP/'
+input_dir = source_path + 'peatland_data/GPP_FluxTower/'
 
 output_file = source_path + 'OUTPUT_pub/GPP_output.txt'
 output_file = source_path + 'GPP/GPP_output.txt'
-#output_file = '/scratch/leuven/317/vsc31786/GPP_output.txt'
+output_file = '/scratch/leuven/317/vsc31786/GPP_output.txt'
+output_path_figure = '/staging/leuven/stg_00024/OUTPUT/michelb/FIG_tmp/GPP_analysis/'
 
 # Set the input parameters
 p = 1
-cloud_filter = 0.10
+# new cloud filter definition --> 0.5 means PAR needs to be 50% of max PAR in that month
+cloud_filter = 0.50
 description = description + ', cloud filter: ' + str(cloud_filter)
 # ----------------------------------------------------------------------------------------------------------------------
 
-# Load the column names
-time_string, format_time, WTD_string, PAR_string, GPP_string = load_dataset(input_file)
-
-# Load the data
-Df = pd.read_csv(input_dir+input_file)
-if format_time == '':
-    Df['Time'] = pd.to_datetime(Df[time_string])
-else:
-    Df['Time'] = pd.to_datetime(Df[time_string], format=format_time)
-del Df[time_string]
-Df.replace(-9999, np.nan, inplace=True)
-Df = Df.set_index(['Time'])
-WTD = pd.Series(Df[WTD_string])
-if input_file == 'CA_MER_GPP_analysis.csv' or input_file == 'mb_met_flux_data_1998_2018.txt':
-    WTD = WTD/100
-if input_file == 'mb_met_flux_data_1998_2018.txt':
-    GPP = pd.Series(Df['nee']-Df['re_f'])
-else:
-    GPP = pd.Series(Df[GPP_string])
-PAR = pd.Series(Df[PAR_string])
+# Load the column
+WTD, PAR, GPP = load_dataset(input_dir, input_file)
 
 # Remove data out of the growing season (= Jun - Sep)
 GPP = GPP.drop(GPP.index[GPP.index.month.isin([1, 2, 3, 4, 5, 10, 11, 12])])
@@ -64,28 +49,59 @@ PAR = PAR.drop(PAR.index[PAR.index.month.isin([1, 2, 3, 4, 5, 10, 11, 12])])
 WTD = WTD.drop(WTD.index[WTD.index.month.isin([1, 2, 3, 4, 5, 10, 11, 12])])
 
 # Focus on noon, around SIF measurements
+# revised: centered around hour of highest GPP value to catch possible inaccuracies due to time zone issues
 hours = PAR.index.hour
-cond_hours = (hours >= 11) & (hours <= 13)
-if input_file == 'FLX_SE-Deg_FLUXNET2015_FULLSET_HH_2001-2020_beta-3_WTD.csv':
-    cond_WTD = (hours >= 0) & (hours <= 2)
-    WTD = WTD[cond_WTD]
-else:
-    WTD = WTD[cond_hours]
+df_temp = pd.DataFrame({'GPP':GPP,'hour':hours})
+#df_temp.boxplot(column='GPP',by='hour')
+# determine hour with max value of GPP
+maxvalue = df_temp.groupby('hour').quantile(0.5).max()
+GPPmax_hour = np.where(df_temp.groupby('hour').quantile(0.5)['GPP'].values==maxvalue.values[0])[0][0]
+cond_hours = (hours >= GPPmax_hour-1) & (hours <= GPPmax_hour+1)
+
 GPP = GPP[cond_hours]
 PAR = PAR[cond_hours]
+WTD = WTD[cond_hours]
 
-if input_file == 'FLX_SE-Deg_FLUXNET2015_FULLSET_HH_2001-2020_beta-3_WTD.csv':
-    WTD.index = GPP.index
-
+# plot time series for checking
+#plt.subplot(3,1,1)
+#plt.plot(GPP,'.')
+#plt.subplot(3,1,2)
+#plt.plot(WTD,'.')
+#plt.subplot(3,1,3)
+#plt.plot(PAR,'.')
+#plt.close()
 
 # Cloud filter: remove the lowest PAR data of every month
+PAR_cloud_filtered = copy.deepcopy(PAR)
+GPP_cloud_filtered = copy.deepcopy(GPP)
+WTD_cloud_filtered = copy.deepcopy(WTD)
 for m in [6, 7, 8, 9]:
     months = PAR.index.month
     PAR_m = np.where(months == m, PAR, np.nan)
-    PAR_cloud = PAR[PAR > np.nanquantile(PAR_m, cloud_filter)]
-    GPP = GPP[PAR > np.nanquantile(PAR_m, cloud_filter)]
-    WTD = WTD[PAR > np.nanquantile(PAR_m, cloud_filter)]
-    PAR = PAR_cloud
+    PAR_max = np.nanmax(PAR_m)
+    #PAR_cloud = PAR[PAR > np.nanquantile(PAR_m, cloud_filter)]
+    #GPP = GPP[PAR > np.nanquantile(PAR_m, cloud_filter)]
+    #WTD = WTD[PAR > np.nanquantile(PAR_m, cloud_filter)]
+    #PAR = PAR_cloud
+    PAR_cloud_filtered[(PAR < cloud_filter*PAR_max) & (months == m)] = np.nan
+    GPP_cloud_filtered[(PAR < cloud_filter*PAR_max) & (months == m)] = np.nan
+    WTD_cloud_filtered[(PAR < cloud_filter*PAR_max) & (months == m)] = np.nan
+
+PAR = PAR_cloud_filtered
+GPP = GPP_cloud_filtered
+WTD = WTD_cloud_filtered
+
+# catch outliers due to problems with PAR sensor
+# Approach: Remove GPP/PAR values that deviate by more than 30% from the median of the current noon window
+GPPn = GPP/PAR
+df_temp = pd.DataFrame({'GPPn':GPPn})
+GPPn_rolling = df_temp.rolling(10,min_periods=2).median()['GPPn']
+rel_dif = np.abs(GPPn-GPPn_rolling)/(0.5*(GPPn+GPPn_rolling))
+filt_outlier = rel_dif>0.3
+PAR[filt_outlier] = np.nan
+GPP[filt_outlier] = np.nan
+WTD[filt_outlier] = np.nan
+############################################
 
 cond_nan = np.isnan(WTD) | np.isnan(GPP) | np.isnan(PAR)
 WTD[cond_nan.values] = np.nan
@@ -94,8 +110,12 @@ PAR[cond_nan.values] = np.nan
 
 # Average to different resolution, coarser resolution reduces the error
 GPP_8D = GPP.resample('8D').mean()
+count8D = GPP.resample('8D').count()
 WTD_8D = WTD.resample('8D').mean()
 PAR_8D = PAR.resample('8D').mean()
+GPP_8D[count8D < 0.2*np.max(count8D)] = np.nan
+WTD_8D[count8D < 0.2*np.max(count8D)] = np.nan
+PAR_8D[count8D < 0.2*np.max(count8D)] = np.nan
 
 # Normalization
 GPPn_8D = GPP_8D/PAR_8D
@@ -114,16 +134,15 @@ GPPn_shortAnom = calc_anom(GPPn_1D, longterm=False)
 PAR_shortAnom = calc_anom(PAR_1D, longterm=False)
 
 # Change the resolution of the 1D anomalies to 8D anomalies
-# WTD_shortAnom8d = WTD_shortAnom.resample('8D').first()
-# GPPn_shortAnom8d = GPPn_shortAnom.resample('8D').first()
-# PAR_shortAnom8d = PAR_shortAnom.resample('8D').first()
+#WTD_shortAnom8d = WTD_shortAnom.resample('8D').first()
+#GPPn_shortAnom8d = GPPn_shortAnom.resample('8D').first()
+#PAR_shortAnom8d = PAR_shortAnom.resample('8D').first()
 WTD_shortAnom8d = WTD_shortAnom.resample('8D').mean()
 GPPn_shortAnom8d = GPPn_shortAnom.resample('8D').mean()
 PAR_shortAnom8d = PAR_shortAnom.resample('8D').mean()
 
 # Model short term anomalies
 coef_s, WTD_opt_s, n_corr_s, fp_values_s, p_values_s, Rsq_s = cal_WaterStressModel(GPPn_shortAnom8d, WTD_shortAnom8d, WTD_8D, 1, WTD_8D.index)
-
 
 print('-------------------------------------------------------------')
 print('Short-term results')
@@ -155,12 +174,34 @@ if write:
 GPPn_longAnom = calc_anom(GPPn_1D, longterm=True) - calc_anom(GPPn_1D, longterm=False)
 WTD_longAnom = calc_anom(WTD_1D, longterm=True) - calc_anom(WTD_1D, longterm=False)
 PAR_longAnom = calc_anom(PAR_1D, longterm=True) - calc_anom(PAR_1D, longterm=False)
-WTD_longAnom8d = WTD_longAnom.resample('8D').first()
-PAR_longAnom8d = PAR_longAnom.resample('8D').first()
-GPPn_longAnom8d = GPPn_longAnom.resample('8D').first()
+WTD_longAnom8d = WTD_longAnom.resample('8D').mean()
+PAR_longAnom8d = PAR_longAnom.resample('8D').mean()
+GPPn_longAnom8d = GPPn_longAnom.resample('8D').mean()
 
 # Model long term anomalies
 coef_l, WTD_opt_l, n_corr_l, fp_values_l, p_values_l, Rsq_l = cal_WaterStressModel(GPPn_longAnom8d, WTD_longAnom8d, WTD_8D, 1, WTD_8D.index)
+
+# GPPn anomalies vs WTD
+dpi = 300
+fig = plt.figure(figsize = (12,5))
+ax1 = plt.subplot(1,2,1)
+p1=plt.plot(WTD_8D,GPPn_shortAnom8d,'.')
+GPPn_shortAnom8d_mod = (coef_s[0]+coef_s[1]*WTD_8D)*WTD_shortAnom8d
+p2=plt.plot(WTD_8D,GPPn_shortAnom8d_mod,'r.')
+plt.xlabel('Water level (m)')
+plt.ylabel('GPP/PAR short-term anomaly (-)')
+plt.legend(['obs','mod'])
+plt.text(0.5, 0.01, 'a: %2.4f b: %2.4f WTDopt: %2.2f' % (coef_s[0],coef_s[1],WTD_opt_s), horizontalalignment='center',transform=ax1.transAxes)
+ax2 = plt.subplot(1,2,2)
+plt.plot(WTD_8D,GPPn_longAnom8d,'.')
+GPPn_longAnom8d_mod = (coef_l[0]+coef_l[1]*WTD_8D)*WTD_longAnom8d
+plt.plot(WTD_8D,GPPn_longAnom8d_mod,'r.')
+plt.xlabel('Water level (m)')
+plt.ylabel('GPP/PAR long-term anomaly (-)')
+plt.legend(['obs','mod'])
+plt.text(0.5, 0.01, 'a: %2.4f b: %2.4f WTDopt: %2.2f' % (coef_l[0],coef_l[1],WTD_opt_l), horizontalalignment='center',transform=ax2.transAxes)
+plt.savefig(output_path_figure+input_file+'.png',dpi=dpi)
+plt.close()
 
 
 print('-------------------------------------------------------------')
