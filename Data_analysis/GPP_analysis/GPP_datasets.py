@@ -45,6 +45,15 @@ def load_dataset(input_dir, input_file):
         GPP_string = 'GPP'
         cm_to_m = False
         mean_elev_ref_correction = 0.0
+    elif input_file == 'FI_LOM_GPP.csv':
+        time_string = 'Date UTC (end time)'
+        format_time = '%d/%m/%Y %H:%M'
+        WTD_string = ''
+        wtd_file = 'WTD_Lompolo_2006-2019.csv'
+        PAR_string = 'PPFD'
+        GPP_string = 'GPP modelled (mgCO2/m2s)'
+        cm_to_m = False
+        mean_elev_ref_correction = 0.0
 
 
     # Load the data
@@ -74,10 +83,26 @@ def load_dataset(input_dir, input_file):
         Df = pd.concat([Df,Df_wtd],axis=1)
         Df_int = Df.interpolate(method='nearest',limit=25,limit_direction='both')
         WTD = Df_int['wl_m']
+    elif wtd_file=='WTD_Lompolo_2006-2019.csv':
+        Df_wtd = pd.read_csv(input_dir+wtd_file)
+        Df_wtd['Time'] = pd.to_datetime(Df_wtd['Date']+' 12:00:00', format='%d.%m.%Y %H:%M:%S')
+        Df_wtd = Df_wtd.set_index('Time')
+        Df_wtd = Df_wtd.drop(columns=('Date'))
+        Df = pd.concat([Df,Df_wtd],axis=1)
+        Df_int = Df.interpolate(method='nearest',limit=25,limit_direction='both')
+        WTD = Df_int['WTD']
+
+
     GPP = pd.Series(Df[GPP_string])
     PAR = pd.Series(Df[PAR_string])
     if cm_to_m:
         WTD = WTD/100
     WTD = WTD + mean_elev_ref_correction
+
+    # convert from PPFD to Watt/sec (typically used for PAR?)
+    # µmol m-2 s-1  --> J m-2 s-1, which is W m-2
+    if PAR_string=='PPFD':
+        PAR = 0.327 * PAR
+
 
     return WTD, PAR, GPP
