@@ -224,7 +224,7 @@ plt.plot(WTD_longAnom8d,GPPn_longAnom8d,'.')
 GPPn_longAnom8d_mod = (coef_l[0]+coef_l[1]*WTD_8D)*WTD_longAnom8d
 plt.plot(WTD_longAnom8d,GPPn_longAnom8d_mod,'r.')
 plt.ticklabel_format(axis='y',style='sci',scilimits=(1,4))
-plt.xlabel('Water level short-term anomaly (m)')
+plt.xlabel('Water level long-term anomaly (m)')
 plt.ylabel('GPP/PAR long-term anomaly (-)')
 plt.legend(['obs','mod'])
 plt.text(0.5, 0.01, 'a: %2.4f b: %2.4f WTDopt: %2.2f' % (coef_l[0],coef_l[1],WTD_opt_l), horizontalalignment='center',transform=ax2.transAxes)
