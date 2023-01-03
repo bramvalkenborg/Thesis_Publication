@@ -15,9 +15,10 @@ source_path = '/data/leuven/317/vsc31786/'
 #source_path = '/Users/bramvalkenborg/Library/CloudStorage/OneDrive-KULeuven/Thesis/Publication/Resubmission/'
 
 # Select the right input file, output directory and output file
-# input_file = 'CA_MER_GPP_analysis.csv'
-input_file = 'US-Los_HH_2000-2022.csv'
-#input_file = 'mb_met_flux_data_1998_2018.txt'
+#input_file = 'CA_MER_GPP_analysis.csv'
+#input_file = 'US-Los_HH_2000-2022.csv'
+#input_file = 'FI_LOM_GPP.csv'
+input_file = 'mb_met_flux_data_1998_2018.txt'
 #input_file = 'FLX_SE-Deg_FLUXNET2015_FULLSET_HH_2001-2020_beta-3.csv'
 #input_file = 'SFZ_S_2010_2020_hh_Michl.csv'
 
@@ -188,6 +189,7 @@ ax1 = plt.subplot(1,2,1)
 p1=plt.plot(WTD_8D,GPPn_shortAnom8d,'.')
 GPPn_shortAnom8d_mod = (coef_s[0]+coef_s[1]*WTD_8D)*WTD_shortAnom8d
 p2=plt.plot(WTD_8D,GPPn_shortAnom8d_mod,'r.')
+plt.ticklabel_format(axis='y',style='sci',scilimits=(1,4))
 plt.xlabel('Water level (m)')
 plt.ylabel('GPP/PAR short-term anomaly (-)')
 plt.legend(['obs','mod'])
@@ -196,6 +198,7 @@ ax2 = plt.subplot(1,2,2)
 plt.plot(WTD_8D,GPPn_longAnom8d,'.')
 GPPn_longAnom8d_mod = (coef_l[0]+coef_l[1]*WTD_8D)*WTD_longAnom8d
 plt.plot(WTD_8D,GPPn_longAnom8d_mod,'r.')
+plt.ticklabel_format(axis='y',style='sci',scilimits=(1,4))
 plt.xlabel('Water level (m)')
 plt.ylabel('GPP/PAR long-term anomaly (-)')
 plt.legend(['obs','mod'])
@@ -204,6 +207,40 @@ plt.savefig(output_path_figure+input_file+'.png',dpi=dpi)
 plt.close()
 
 
+# GPPn anomalies vs WTD
+dpi = 300
+fig = plt.figure(figsize = (12,5))
+ax1 = plt.subplot(1,2,1)
+p1=plt.plot(WTD_shortAnom8d,GPPn_shortAnom8d,'.')
+GPPn_shortAnom8d_mod = (coef_s[0]+coef_s[1]*WTD_8D)*WTD_shortAnom8d
+p2=plt.plot(WTD_shortAnom8d,GPPn_shortAnom8d_mod,'r.')
+plt.ticklabel_format(axis='y',style='sci',scilimits=(1,4))
+plt.xlabel('Water level short-term anomaly (m)')
+plt.ylabel('GPP/PAR short-term anomaly (-)')
+plt.legend(['obs','mod'])
+plt.text(0.5, 0.01, 'a: %2.4f b: %2.4f WTDopt: %2.2f' % (coef_s[0],coef_s[1],WTD_opt_s), horizontalalignment='center',transform=ax1.transAxes)
+ax2 = plt.subplot(1,2,2)
+plt.plot(WTD_longAnom8d,GPPn_longAnom8d,'.')
+GPPn_longAnom8d_mod = (coef_l[0]+coef_l[1]*WTD_8D)*WTD_longAnom8d
+plt.plot(WTD_longAnom8d,GPPn_longAnom8d_mod,'r.')
+plt.ticklabel_format(axis='y',style='sci',scilimits=(1,4))
+plt.xlabel('Water level short-term anomaly (m)')
+plt.ylabel('GPP/PAR long-term anomaly (-)')
+plt.legend(['obs','mod'])
+plt.text(0.5, 0.01, 'a: %2.4f b: %2.4f WTDopt: %2.2f' % (coef_l[0],coef_l[1],WTD_opt_l), horizontalalignment='center',transform=ax2.transAxes)
+plt.savefig(output_path_figure+input_file+'_anomalies.png',dpi=dpi)
+plt.close()
+
+
+print('-------------------------------------------------------------')
+print('Long term results')
+print('-------------------------------------------------------------')
+print('Alpha: '+str(coef_l[0]))
+print('Beta: '+str(coef_l[1]))
+print('WTDopt: '+str(WTD_opt_l))
+print('fp_values_s: '+str(fp_values_l))
+print('R2: '+str(Rsq_l))
+print('-------------------------------------------------------------')
 print('-------------------------------------------------------------')
 print('Long term results')
 print('-------------------------------------------------------------')
